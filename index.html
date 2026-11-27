@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECHOES: THE LAST THING YOU DID</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="ambient-bg" aria-hidden="true"></div>
+
+    <!-- Top HUD -->
+    <header id="hud" class="hud hidden">
+      <div class="hud-left">
+        <div class="sector-pill">
+          <span class="pulse-dot"></span>
+          <span id="hud-sector">SECTOR 01 / 03</span>
+        </div>
+        <div class="room-heading">
+          <h1 id="hud-room-name">FIRST MEMORY</h1>
+          <span id="hud-room-sub" class="room-sub">Temporal Calibration Wing</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div class="telemetry-card">
+          <span class="telemetry-label">ECHOES</span>
+          <div id="echo-slots" class="echo-slots" aria-label="Echo slots">
+            <div class="echo-slot" data-slot="0"><span class="slot-dot"></span><span class="slot-steps">--</span></div>
+            <div class="echo-slot" data-slot="1"><span class="slot-dot"></span><span class="slot-steps">--</span></div>
+            <div class="echo-slot" data-slot="2"><span class="slot-dot"></span><span class="slot-steps">--</span></div>
+          </div>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-label">STEP</span>
+          <span id="hud-step" class="telemetry-value">00</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-label">PLATES</span>
+          <span id="hud-plates" class="telemetry-value">0 / 1</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <button id="btn-rewind" class="hud-btn accent" title="Rewind &amp; Create Echo (R)">Rewind <kbd>R</kbd></button>
+        <button id="btn-wait" class="hud-btn" title="Wait 1 Step (Space)">Wait <kbd>␣</kbd></button>
+        <button id="btn-restart" class="hud-btn" title="Restart Room (X)">Restart <kbd>X</kbd></button>
+        <button id="btn-mute" class="hud-btn icon-btn" title="Toggle Audio (M)" aria-label="Toggle Audio">
+          <span id="mute-label">SFX ON</span>
+        </button>
+        <button id="btn-pause" class="hud-btn" title="Help &amp; Pause (Esc)">Menu <kbd>Esc</kbd></button>
+      </div>
+    </header>
+
+    <!-- Main Playfield -->
+    <main id="stage" class="stage">
+      <div id="canvas-wrap" class="canvas-wrap">
+        <canvas id="game-canvas"></canvas>
+        <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+      </div>
+
+      <footer id="bottom-bar" class="bottom-bar hidden">
+        <div id="hint-text" class="hint-text"></div>
+        <div class="controls-strip">
+          <span><kbd>WASD</kbd> / <kbd>Arrows</kbd> Move</span>
+          <span><kbd>Space</kbd> Wait</span>
+          <span><kbd>R</kbd> Rewind &amp; Echo</span>
+          <span><kbd>X</kbd> Restart Room</span>
+          <span><kbd>Esc</kbd> Pause</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Start / Title Screen -->
+    <section id="start-screen" class="overlay">
+      <div class="panel start-panel">
+        <div class="eyebrow">SECTOR 7 RESEARCH FACILITY // TEMPORAL BREACH</div>
+        <h1 class="game-title">ECHOES</h1>
+        <p class="game-subtitle">THE LAST THING YOU DID</p>
+        <p class="lead">
+          Time inside the facility has fractured. Every time you rewind, your previous path lingers as a translucent echo—replaying your steps so you can cooperate with your own past self and escape.
+        </p>
+
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-step">01</div>
+            <h3>RECORD</h3>
+            <p>Move with <kbd>WASD</kbd> or <kbd>Arrow Keys</kbd> to step onto a pressure plate. Press <kbd>Space</kbd> to wait in place.</p>
+          </div>
+          <div class="how-card">
+            <div class="how-step">02</div>
+            <h3>REWIND</h3>
+            <p>Press <kbd>R</kbd> to rewind the room. Your past movement becomes an echo (up to 3 echoes; oldest is replaced).</p>
+          </div>
+          <div class="how-card">
+            <div class="how-step">03</div>
+            <h3>COOPERATE</h3>
+            <p>Move alongside your echoes. Activate all required plates simultaneously to unlock doors and reach the exit.</p>
+          </div>
+        </div>
+
+        <div class="start-actions">
+          <button id="btn-play" class="primary-btn">ENTER FACILITY</button>
+          <button id="btn-start-mute" class="secondary-btn">SFX: ON</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pause / Instructions Overlay -->
+    <section id="pause-screen" class="overlay hidden">
+      <div class="panel modal-panel">
+        <div class="eyebrow">SYSTEM PAUSED</div>
+        <h2>TEMPORAL MANUAL</h2>
+        <div class="manual-list">
+          <div class="manual-item">
+            <strong>Deterministic Echoes</strong>
+            <span>Press <kbd>R</kbd> to return to the start tile. Everything you just walked becomes a cyan/violet echo that replays step-by-step and holds its final position.</span>
+          </div>
+          <div class="manual-item">
+            <strong>Three-Echo Limit</strong>
+            <span>Up to 3 echoes can coexist. Rewinding a 4th time replaces the oldest echo. Use <kbd>X</kbd> to wipe echoes and restart the current room cleanly.</span>
+          </div>
+          <div class="manual-item">
+            <strong>Plates &amp; Security Gates</strong>
+            <span>Follow glowing floor conduits from plates to doors. All core plates must be held simultaneously to open the exit.</span>
+          </div>
+        </div>
+        <div class="controls-grid">
+          <div><kbd>W A S D</kbd> / <kbd>Arrows</kbd></div><div>Move 1 tile</div>
+          <div><kbd>Space</kbd></div><div>Wait 1 step (sync timing)</div>
+          <div><kbd>R</kbd></div><div>Rewind &amp; spawn echo</div>
+          <div><kbd>X</kbd></div><div>Restart room (clear echoes)</div>
+          <div><kbd>M</kbd></div><div>Mute / Unmute audio</div>
+          <div><kbd>Esc</kbd></div><div>Resume / Pause</div>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-resume" class="primary-btn">RESUME</button>
+          <button id="btn-pause-restart" class="secondary-btn">RESTART ROOM</button>
+          <button id="btn-to-title" class="ghost-btn">TITLE SCREEN</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Room Clear Overlay -->
+    <section id="room-clear-screen" class="overlay hidden">
+      <div class="panel modal-panel compact">
+        <div class="eyebrow">EXIT BREACHED</div>
+        <h2 id="clear-room-title">FIRST MEMORY COMPLETE</h2>
+        <p id="clear-room-desc" class="lead-small">Temporal synchronization confirmed.</p>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">STEPS</span>
+            <span id="clear-steps" class="stat-val">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ECHOES ACTIVE</span>
+            <span id="clear-echoes" class="stat-val">0</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-next-room" class="primary-btn">NEXT SECTOR</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Victory Screen -->
+    <section id="victory-screen" class="overlay hidden">
+      <div class="panel modal-panel victory-panel">
+        <div class="victory-emblem" aria-hidden="true">
+          <span class="v-ring v-ring-outer"></span>
+          <span class="v-ring v-ring-inner"></span>
+          <span class="v-core"></span>
+        </div>
+        <div class="eyebrow">ALL SECTORS CLEARED // TIMELINE STABILIZED</div>
+        <h1 class="victory-title">OUT OF TIME, FREE AT LAST</h1>
+        <p class="lead">
+          You synchronized with your own fractured timeline and escaped Sector 7. Behind you, the containment loops fade into silence.
+        </p>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">TOTAL STEPS</span>
+            <span id="victory-steps" class="stat-val">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TOTAL REWINDS</span>
+            <span id="victory-rewinds" class="stat-val">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">SECTORS</span>
+            <span class="stat-val">3 / 3</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-play-again" class="primary-btn">PLAY AGAIN</button>
+          <button id="btn-victory-title" class="ghost-btn">TITLE SCREEN</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
